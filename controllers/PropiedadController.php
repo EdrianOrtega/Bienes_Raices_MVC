@@ -11,13 +11,16 @@ class PropiedadController {
     public static function index(Router $router) {
 
         $propiedades = Propiedad::all(); 
+
+        $vendedores = Vendedor::all(); 
         
         //Muestra mensaje condicionado 
         $resultado = $_GET['resultado'] ?? null; 
 
         $router->render('propiedades/admin', [
             'propiedades' => $propiedades, 
-            'resultado' => $resultado 
+            'resultado' => $resultado, 
+            'vendedores' => $vendedores 
         ]); 
     }
 
@@ -33,7 +36,6 @@ class PropiedadController {
         
             /** Crea una nueva instancia  **/ 
             $propiedad = new Propiedad($_POST['propiedad']); 
-            debuguear($propiedad); 
     
             /** SUBIDA DE ARCHIVOS */
     
@@ -83,11 +85,58 @@ class PropiedadController {
 
         $errores = Propiedad::getErrores(); 
 
+        // Método para actualizar 
+        if( $_SERVER['REQUEST_METHOD'] === 'POST' ) { 
+
+            // Asignando los atributos 
+            $args = $_POST['propiedad']; 
+            
+            $propiedad->sincronizar($args); 
+    
+            // Validación 
+            $errores = $propiedad->validar(); 
+    
+            // Subida de archivos 
+            // Generar un Nombre Único 
+            $nombreImagen = md5( uniqid( rand(), true ) ) . ".jpg"; 
+    
+            if($_FILES['propiedad']['tmp_name']['imagen']) {
+                $image = Image::make($_FILES['propiedad']['tmp_name']['imagen'])->fit(800,600); 
+                $propiedad->setImagen($nombreImagen); 
+            }
+    
+            if( empty($errores) ) {
+                if($_FILES['propiedad']['tmp_name']['imagen']) {
+                    // Almacenar la imagen 
+                    $image->save(CARPETA_IMAGENES . $nombreImagen); 
+            }
+    
+                $propiedad->guardar(); 
+            }
+        }
+
         $router->render('/propiedades/actualizar', [
             'propiedad' => $propiedad,
             'errores' => $errores,
             'vendedores' => $vendedores 
         ]); 
+    }
+
+    public static function eliminar() { 
+        if($_SERVER['REQUEST_METHOD'] === 'POST') { // esto se coloca para soportar el metodo POST 
+
+            // Validar id 
+            $id = $_POST['id']; 
+            $id = filter_var($id, FILTER_VALIDATE_INT); 
+    
+            if($id) {
+                $tipo = $_POST['tipo']; 
+                if(validarTipoContenido($tipo)) {
+                    $propiedad = Propiedad::find($id); 
+                    $propiedad->eliminar(); 
+                } 
+            } 
+        }
     }
 
 }
