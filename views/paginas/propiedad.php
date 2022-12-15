@@ -20,7 +20,6 @@
             </li> 
         </ul>
 
-        <?php echo $propiedad->descripcion; ?>
-
+        <?php echo $propiedad->descripcion; ?> 
     </div>
 </main>
