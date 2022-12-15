@@ -16,21 +16,40 @@ class PaginasController {
             'inicio' => $inicio 
         ]); 
     }
+
     public static function nosotros( Router $router) {
-        $router->render('paginas/nosotros', []); 
+        $router->render('paginas/nosotros'); 
     }
-    public static function propiedades() {
-        echo "desde propiedades"; 
+
+    public static function propiedades( Router $router) {
+
+        $propiedades = Propiedad::all(); 
+
+        $router->render('paginas/propiedades', [
+            'propiedades' => $propiedades 
+        ]); 
     }
-    public static function propiedad() {
-        echo "desde propiedad"; 
+
+    public static function propiedad( Router $router) {
+
+        $id = validarORedireccionar('/propiedades'); 
+
+        // buscar la propiedad por su id 
+        $propiedad = Propiedad::find($id); 
+
+        $router->render('paginas/propiedad', [
+            'propiedad' => $propiedad 
+        ]); 
     }
+
     public static function blog() {
         echo "desde blog"; 
     }
+
     public static function entrada() {
         echo "desde entrada"; 
     }
+
     public static function contacto() {
         echo "desde contacto"; 
     } 
