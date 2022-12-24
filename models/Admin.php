@@ -41,5 +41,27 @@ class Admin extends ActiveRecord {
         }
         return $resultado; 
     }
+
+    public function comprobarPassword($resultado) {
+        $usuario = $resultado->fetch_object(); 
+
+        $autenticado = password_verify($this->password, $usuario->password); 
+
+        if(!$autenticado) {
+            self::$errores[] = 'El Password es Incorrecto'; 
+        }
+
+        return $autenticado; 
+    }
+
+    public function autenticar() {
+        session_start(); 
+
+        // Llenar el arreglo de sesión 
+        $_SESSION['usuario'] = $this->email; 
+        $_SESSION['login'] = true; 
+
+        header('Location: /admin'); 
+    }
 }
 
